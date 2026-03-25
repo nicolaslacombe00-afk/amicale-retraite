@@ -29,11 +29,6 @@ jobs:
           printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-      - name: Add server to known hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts
-
       - name: Create deployment archive
         run: |
           tar \
@@ -47,11 +42,21 @@ jobs:
 
       - name: Upload archive
         run: |
-          scp -i ~/.ssh/deploy_key -P "${SSH_PORT:-22}" deploy.tgz "${SSH_USERNAME}@${SSH_HOST}:${APP_PATH}/deploy.tgz"
+          scp \
+            -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -P "${SSH_PORT:-22}" \
+            deploy.tgz "${SSH_USERNAME}@${SSH_HOST}:${APP_PATH}/deploy.tgz"
 
       - name: Deploy on server
         run: |
-          ssh -i ~/.ssh/deploy_key -p "${SSH_PORT:-22}" "${SSH_USERNAME}@${SSH_HOST}" "
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -p "${SSH_PORT:-22}" \
+            "${SSH_USERNAME}@${SSH_HOST}" "
             set -e
             cd '${APP_PATH}'
             tar -xzf deploy.tgz
