@@ -1,7 +1,5 @@
 {
-  "HomePage": {
-    "eyebrow": "Base vierge",
-    "title": "Un nouveau socle propre, pret a construire.",
-    "description": "Le projet a ete reinitialise avec la stack technique d'origine, mais sans contenu metier ni structure historique."
+  "app": {
+    "name": "Amicale des Retraites RAGT"
   }
 }

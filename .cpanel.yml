@@ -1,0 +1,4 @@
+---
+deployment:
+  tasks:
+    - /usr/bin/bash scripts/o2switch-deploy.sh
