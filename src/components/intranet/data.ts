@@ -1,4 +1,5 @@
 export type IconName =
+  | 'badge'
   | 'calendar'
   | 'camera'
   | 'chevron-down'

@@ -72,10 +72,31 @@ export async function AppShell({
                 <NavButton key={item.label} item={item} />
               ))}
             </div>
+
+            {user.role === 'ADMIN' ? (
+              <>
+                <div className="mx-3 my-4 border-t border-white/10" />
+                <div className="space-y-0.5">
+                  <NavButton
+                    item={{ label: 'Administration', icon: 'badge', href: '/admin', trailing: true }}
+                    active={activePath === '/admin'}
+                  />
+                </div>
+              </>
+            ) : null}
           </div>
 
           <div className="pt-3">
             <div className="rounded-[20px] border border-white/10 bg-[#141b26]/70 p-3">
+              {user.role === 'ADMIN' ? (
+                <Link
+                  href="/admin"
+                  className="mb-3 flex w-full items-center justify-center rounded-2xl bg-[#0f9d6b] px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#12a975]"
+                >
+                  Ouvrir le back-office
+                </Link>
+              ) : null}
+
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-sm font-bold text-white">
                   {getInitials(user.name)}
@@ -333,6 +354,12 @@ export function Pill({ children, active = false }: { children: ReactNode; active
 
 export function AppIcon({ name, className }: { name: IconName; className?: string }) {
   const paths: Record<IconName, ReactNode> = {
+    badge: (
+      <>
+        <path d="M12 3 6 5v5c0 5 2.9 9.1 6 11 3.1-1.9 6-6 6-11V5z" />
+        <path d="m9.5 12 1.7 1.7 3.3-3.4" />
+      </>
+    ),
     calendar: (
       <>
         <rect x="3" y="4" width="18" height="18" rx="2" />

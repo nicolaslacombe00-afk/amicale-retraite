@@ -16,16 +16,22 @@ enum UserRole {
   USER
 }
 
+enum NewsStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  name         String
-  passwordHash String
-  role         UserRole  @default(USER)
-  isActive     Boolean   @default(true)
-  sessions     Session[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id              String        @id @default(cuid())
+  email           String        @unique
+  name            String
+  passwordHash    String
+  role            UserRole      @default(USER)
+  isActive        Boolean       @default(true)
+  sessions        Session[]
+  authoredArticles NewsArticle[] @relation("ArticleAuthor")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 model Session {
@@ -39,4 +45,51 @@ model Session {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model NewsCategory {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String?
+  articles    NewsArticle[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([name])
+}
+
+model NewsArticle {
+  id            String        @id @default(cuid())
+  title         String
+  slug          String        @unique
+  excerpt       String
+  content       String
+  coverImageUrl String?
+  status        NewsStatus    @default(DRAFT)
+  featured      Boolean       @default(false)
+  publishedAt   DateTime?
+  categoryId    String
+  authorId      String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  category      NewsCategory  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  author        User?         @relation("ArticleAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  images        NewsImage[]
+
+  @@index([categoryId])
+  @@index([status, publishedAt])
+}
+
+model NewsImage {
+  id        String      @id @default(cuid())
+  articleId String
+  url       String
+  alt       String?
+  caption   String?
+  sortOrder Int         @default(0)
+  createdAt DateTime    @default(now())
+  article   NewsArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId, sortOrder])
 }
