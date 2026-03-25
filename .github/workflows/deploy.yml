@@ -31,12 +31,14 @@ jobs:
 
       - name: Create deployment archive
         run: |
+          rm -f deploy.tgz
           tar \
             --exclude=.git \
             --exclude=.github \
             --exclude=.next \
             --exclude=node_modules \
             --exclude=.env \
+            --exclude=deploy.tgz \
             --exclude=o2switch-build.zip \
             -czf deploy.tgz .
 
