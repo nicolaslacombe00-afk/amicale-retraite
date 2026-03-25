@@ -17,6 +17,20 @@ function getSessionCookieName() {
   return process.env.SESSION_COOKIE_NAME || 'amicale_session'
 }
 
+function shouldUseSecureCookie() {
+  const configuredValue = process.env.SESSION_COOKIE_SECURE
+
+  if (configuredValue === 'true') {
+    return true
+  }
+
+  if (configuredValue === 'false') {
+    return false
+  }
+
+  return process.env.NODE_ENV === 'production'
+}
+
 function hashSessionToken(token: string) {
   return createHash('sha256').update(token).digest('hex')
 }
@@ -25,7 +39,7 @@ function getSessionCookieOptions(expiresAt: Date) {
   return {
     httpOnly: true,
     sameSite: 'lax' as const,
-    secure: process.env.NODE_ENV === 'production',
+    secure: shouldUseSecureCookie(),
     expires: expiresAt,
     path: '/',
     domain: process.env.COOKIE_DOMAIN || undefined,

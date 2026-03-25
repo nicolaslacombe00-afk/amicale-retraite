@@ -90,3 +90,12 @@ npm run db:seed
 ## Remarque importante
 
 O2Switch indique que son support PostgreSQL pourrait etre retire a l'avenir et que la version proposee via cPanel est ancienne. Prisma supporte PostgreSQL `9.6+`, donc cela reste compatible a date, mais il est sage de garder ce point en tete pour la suite.
+
+## Depannage preprod
+
+Si `/login` renvoie une erreur serveur juste apres deploiement sur o2switch/cPanel, verifier en priorite les logs Node.js pour Prisma. Le build standalone doit embarquer un moteur Prisma compatible avec l'OS/OpenSSL du serveur cible. Le schema inclut plusieurs `binaryTargets` Linux pour couvrir les variantes Debian et RHEL les plus courantes, puis il faut relancer:
+
+```bash
+npm run db:generate
+npm run build
+```
