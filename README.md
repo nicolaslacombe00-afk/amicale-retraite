@@ -99,3 +99,29 @@ Si `/login` renvoie une erreur serveur juste apres deploiement sur o2switch/cPan
 npm run db:generate
 npm run build
 ```
+
+## Deploiement automatique GitHub Actions
+
+Le repo inclut un workflow [`.github/workflows/deploy.yml`](/Users/nicolaslacombe/amicale-retraites-ragt/.github/workflows/deploy.yml) qui deploie automatiquement sur chaque `push` vers `main`.
+
+Le workflow:
+
+- envoie le code source sur le serveur en SSH
+- conserve le fichier `.env` deja present sur le serveur
+- lance [`scripts/o2switch-deploy.sh`](/Users/nicolaslacombe/amicale-retraites-ragt/scripts/o2switch-deploy.sh)
+- tente un redemarrage via `tmp/restart.txt`
+
+Secrets GitHub a creer dans `Settings > Secrets and variables > Actions`:
+
+- `SSH_HOST`: nom de domaine ou IP du serveur
+- `SSH_PORT`: port SSH, generalement `22`
+- `SSH_USERNAME`: utilisateur SSH
+- `SSH_PRIVATE_KEY`: cle privee de deploiement
+- `APP_PATH`: chemin absolu de l'application sur le serveur, par exemple `/home/<cpanel_user>/apps/amicale-retraites-ragt`
+
+Pre-requis cote serveur:
+
+- l'application Node.js existe deja dans cPanel
+- le fichier `.env` est deja present dans `APP_PATH`
+- SSH est actif pour le compte
+- `APP_PATH` pointe bien sur la racine du projet
