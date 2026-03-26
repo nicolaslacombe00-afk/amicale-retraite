@@ -191,8 +191,7 @@ export async function updateNewsArticleAction(articleId: string, formData: FormD
 
 export async function deleteNewsArticleAction(articleId: string) {
   await requireAdminUser()
-
-  const returnTo = '/admin?section=actualites'
+  const returnTo = '/admin/actualites'
 
   const current = await prisma.newsArticle.findUnique({
     where: { id: articleId },

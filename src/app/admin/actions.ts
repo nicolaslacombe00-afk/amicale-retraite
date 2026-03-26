@@ -116,7 +116,7 @@ export async function createEventAction(formData: FormData) {
   const coverImageUrl = String(formData.get('coverImageUrl') || '').trim() || null
   const startAt = parseDate(formData.get('startAt'))
   const endAt = parseDate(formData.get('endAt'))
-  const returnTo = String(formData.get('returnTo') || '/admin?section=evenements').trim()
+  const returnTo = String(formData.get('returnTo') || '/admin/evenements').trim()
   const status = formData.get('status') === EventStatus.COMPLETED ? EventStatus.COMPLETED : EventStatus.UPCOMING
 
   if (!title || !summary || !description || !location || !startAt) {
@@ -141,7 +141,7 @@ export async function createEventAction(formData: FormData) {
   redirect(withQuery(returnTo, 'success', 'event-created'))
 }
 
-export async function deleteEventAction(eventId: string, returnTo = '/admin?section=evenements') {
+export async function deleteEventAction(eventId: string, returnTo = '/admin/evenements') {
   await requireAdminUser()
 
   await prisma.event.delete({
@@ -166,7 +166,7 @@ export async function updateMemberAction(memberId: string, formData: FormData) {
   const joinedAmicaleAt = parseDate(formData.get('joinedAmicaleAt'))
   const role = formData.get('role') === UserRole.ADMIN ? UserRole.ADMIN : UserRole.USER
   const isActive = formData.get('isActive') === 'on'
-  const returnTo = String(formData.get('returnTo') || '/admin?section=membres').trim()
+  const returnTo = String(formData.get('returnTo') || '/admin/membres').trim()
 
   if (!name || !email) {
     redirect(withQuery(returnTo, 'error', 'missing'))
@@ -200,7 +200,7 @@ export async function createPhotoAlbumAction(formData: FormData) {
   const summary = String(formData.get('summary') || '').trim()
   const coverImageUrl = String(formData.get('coverImageUrl') || '').trim() || null
   const eventId = String(formData.get('eventId') || '').trim() || null
-  const returnTo = String(formData.get('returnTo') || '/admin?section=galerie').trim()
+  const returnTo = String(formData.get('returnTo') || '/admin/galerie-photo').trim()
   const photos = parsePhotos(String(formData.get('photos') || ''))
 
   if (!title || !summary) {
@@ -224,7 +224,7 @@ export async function createPhotoAlbumAction(formData: FormData) {
   redirect(withQuery(returnTo, 'success', 'album-created'))
 }
 
-export async function deletePhotoAlbumAction(albumId: string, returnTo = '/admin?section=galerie') {
+export async function deletePhotoAlbumAction(albumId: string, returnTo = '/admin/galerie-photo') {
   await requireAdminUser()
 
   await prisma.photoAlbum.delete({
@@ -240,7 +240,7 @@ export async function uploadAdminDocumentAction(formData: FormData) {
   const title = String(formData.get('title') || '').trim()
   const description = String(formData.get('description') || '').trim()
   const file = formData.get('file')
-  const returnTo = String(formData.get('returnTo') || '/admin?section=documents').trim()
+  const returnTo = String(formData.get('returnTo') || '/admin/documents').trim()
 
   if (!title || !(file instanceof File) || file.size === 0) {
     redirect(withQuery(returnTo, 'error', 'missing'))
@@ -257,7 +257,7 @@ export async function uploadAdminDocumentAction(formData: FormData) {
   redirect(withQuery(returnTo, 'success', 'document-uploaded'))
 }
 
-export async function deleteDocumentAction(documentId: string, returnTo = '/admin?section=documents') {
+export async function deleteDocumentAction(documentId: string, returnTo = '/admin/documents') {
   await requireAdminUser()
 
   const document = await prisma.document.findUnique({

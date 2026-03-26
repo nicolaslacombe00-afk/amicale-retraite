@@ -1,9 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { AppShell } from '@/src/components/intranet/shell'
+import { AdminShell } from '@/src/components/admin/shell'
 import { deleteNewsArticleAction, updateNewsArticleAction } from '@/src/app/admin/actualites/actions'
 import { getAdminNewsArticle, listAdminCategories } from '@/src/lib/news'
-import { requireAdminUser } from '@/src/lib/auth/session'
 
 export default async function AdminActualiteDetailPage({
   params,
@@ -12,8 +11,6 @@ export default async function AdminActualiteDetailPage({
   params: Promise<{ id: string }>
   searchParams: Promise<{ error?: string; success?: string }>
 }) {
-  await requireAdminUser()
-
   const { id } = await params
   const [article, categories, query] = await Promise.all([getAdminNewsArticle(id), listAdminCategories(), searchParams])
 
@@ -35,29 +32,28 @@ export default async function AdminActualiteDetailPage({
           : null
 
   return (
-    <AppShell activePath="/admin" title="Edition d'une actualite" eyebrow="Administration">
+    <AdminShell
+      activePath="/admin/actualites"
+      title="Edition d une actualite"
+      description="Retouchez le contenu, la galerie et le statut editorial de cet article."
+      actions={
+        <>
+          <Link
+            href={`/actualites/${article.slug}`}
+            className="rounded-full border border-[#d8e0ec] bg-white px-4 py-2 text-sm font-bold text-[#223048] transition hover:bg-[#f8fafe]"
+          >
+            Voir l article
+          </Link>
+          <Link
+            href="/admin/actualites"
+            className="rounded-full bg-[#121b2c] px-4 py-2 text-sm font-bold text-white transition hover:bg-black"
+          >
+            Retour liste
+          </Link>
+        </>
+      }
+    >
       <div className="mx-auto max-w-[980px]">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[#99a3b4]">Edition</p>
-            <h3 className="mt-2 text-[26px] font-extrabold text-[#182235]">{article.title}</h3>
-          </div>
-          <div className="flex gap-2">
-            <Link
-              href={`/actualites/${article.slug}`}
-              className="rounded-full border border-[#d8e0ec] px-4 py-2 text-sm font-bold text-[#223048] transition hover:bg-white"
-            >
-              Voir l&apos;article
-            </Link>
-            <Link
-              href="/admin?section=actualites"
-              className="rounded-full bg-[#121b2c] px-4 py-2 text-sm font-bold text-white transition hover:bg-black"
-            >
-              Retour au back-office
-            </Link>
-          </div>
-        </div>
-
         {feedback ? <div className={`mb-6 rounded-2xl border px-4 py-3 text-sm font-medium ${feedback.tone}`}>{feedback.message}</div> : null}
 
         <section className="rounded-[28px] border border-[#ececec] bg-white p-6 shadow-[0_8px_22px_rgba(15,23,42,0.04)] xl:p-8">
@@ -179,6 +175,6 @@ export default async function AdminActualiteDetailPage({
           </form>
         </section>
       </div>
-    </AppShell>
+    </AdminShell>
   )
 }
