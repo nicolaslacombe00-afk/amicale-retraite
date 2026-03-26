@@ -63,10 +63,10 @@ export type QuickLink = {
 
 export const primaryNav: NavItem[] = [
   { label: 'Actualites', icon: 'newspaper', trailing: true, href: '/actualites' },
-  { label: 'Evenements', icon: 'calendar' },
-  { label: 'Membres', icon: 'users' },
-  { label: 'Galerie photo', icon: 'camera', trailing: true },
-  { label: 'Documents', icon: 'file-text', trailing: true },
+  { label: 'Evenements', icon: 'calendar', href: '/evenements' },
+  { label: 'Membres', icon: 'users', href: '/membres' },
+  { label: 'Galerie photo', icon: 'camera', trailing: true, href: '/galerie-photo' },
+  { label: 'Documents', icon: 'file-text', trailing: true, href: '/documents' },
 ]
 
 export const secondaryNav: NavItem[] = [

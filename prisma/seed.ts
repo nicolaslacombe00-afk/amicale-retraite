@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, NewsStatus } from '@prisma/client'
+import { PrismaClient, UserRole, NewsStatus, EventStatus } from '@prisma/client'
 import { hashPassword } from '../src/lib/auth/password'
 
 const prisma = new PrismaClient()
@@ -10,12 +10,52 @@ async function main() {
       name: 'Jean-Pierre Martin',
       password: 'Admin2030!',
       role: UserRole.ADMIN,
+      city: 'Rodez',
+      phone: '06 12 34 56 78',
+      formerJobTitle: 'Responsable logistique',
+      formerDepartment: 'Exploitation agricole',
+      bio: "Passionne de randonnee et membre actif du bureau, Jean-Pierre anime plusieurs temps forts de l'amicale.",
+      avatarUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80',
+      joinedAmicaleAt: new Date('2021-02-10T00:00:00.000Z'),
     },
     {
       email: 'membre@amicale-ragt.local',
       name: 'Sophie Laurent',
       password: 'Membre2030!',
       role: UserRole.USER,
+      city: 'Onet-le-Chateau',
+      phone: '06 98 76 54 32',
+      formerJobTitle: 'Assistante RH',
+      formerDepartment: 'Ressources humaines',
+      bio: "Sophie aime organiser les sorties culturelles et participer aux ateliers memoire proposes par l'amicale.",
+      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80',
+      joinedAmicaleAt: new Date('2023-09-18T00:00:00.000Z'),
+    },
+    {
+      email: 'marc@amicale-ragt.local',
+      name: 'Marc Lenoir',
+      password: 'Marc2030!',
+      role: UserRole.USER,
+      city: 'Luc-la-Primaube',
+      phone: '06 11 22 33 44',
+      formerJobTitle: 'Technicien maintenance',
+      formerDepartment: 'Services techniques',
+      bio: "Marc suit de pres la galerie photo et partage volontiers ses souvenirs de sorties nature.",
+      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80',
+      joinedAmicaleAt: new Date('2022-04-07T00:00:00.000Z'),
+    },
+    {
+      email: 'anne@amicale-ragt.local',
+      name: 'Anne Viala',
+      password: 'Anne2030!',
+      role: UserRole.USER,
+      city: 'Villefranche-de-Rouergue',
+      phone: '06 55 44 33 22',
+      formerJobTitle: 'Chargee communication',
+      formerDepartment: 'Communication',
+      bio: "Anne coordonne volontiers les comptes-rendus et aide a la mise en forme des documents internes.",
+      avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80',
+      joinedAmicaleAt: new Date('2024-01-12T00:00:00.000Z'),
     },
   ] as const
 
@@ -29,6 +69,13 @@ async function main() {
         role: user.role,
         isActive: true,
         passwordHash: await hashPassword(user.password),
+        city: user.city,
+        phone: user.phone,
+        formerJobTitle: user.formerJobTitle,
+        formerDepartment: user.formerDepartment,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
+        joinedAmicaleAt: user.joinedAmicaleAt,
       },
       create: {
         email: user.email,
@@ -36,6 +83,13 @@ async function main() {
         role: user.role,
         isActive: true,
         passwordHash: await hashPassword(user.password),
+        city: user.city,
+        phone: user.phone,
+        formerJobTitle: user.formerJobTitle,
+        formerDepartment: user.formerDepartment,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
+        joinedAmicaleAt: user.joinedAmicaleAt,
       },
     })
 
@@ -204,10 +258,205 @@ async function main() {
     }
   }
 
+  const events = [
+    {
+      slug: 'pot-accueil-nouveaux-membres',
+      title: "Pot d'accueil des nouveaux membres",
+      summary: 'Une rencontre conviviale pour accueillir les nouveaux adherents de l amicale.',
+      description:
+        "Cette rencontre est pensee comme un temps simple et chaleureux pour faire connaissance avec les nouveaux membres.\n\nLe bureau presentera les activites a venir, les groupes de sortie et les habitudes de fonctionnement de l amicale.\n\nUn buffet leger cloturera la soiree afin de laisser place aux echanges informels.",
+      location: 'Maison des associations de Rodez',
+      coverImageUrl: 'https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&w=1200&q=80',
+      startAt: new Date('2026-11-12T18:30:00.000Z'),
+      endAt: new Date('2026-11-12T21:00:00.000Z'),
+      status: EventStatus.UPCOMING,
+    },
+    {
+      slug: 'randonnee-fontainebleau',
+      title: 'Randonnee Fontainebleau',
+      summary: 'Une journee au vert avec un parcours adapte a tous les niveaux.',
+      description:
+        "La randonnee de Fontainebleau fait partie des sorties preferees des membres.\n\nCette edition proposera un parcours de 12 km, avec plusieurs haltes et un pique-nique partage.\n\nLe rendez-vous est prevu tot le matin afin de profiter au maximum de la journee.",
+      location: 'Depart parking du stade - Fontainebleau',
+      coverImageUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
+      startAt: new Date('2026-11-24T08:00:00.000Z'),
+      endAt: new Date('2026-11-24T17:30:00.000Z'),
+      status: EventStatus.UPCOMING,
+    },
+    {
+      slug: 'visite-culturelle-rodez',
+      title: 'Visite culturelle a Rodez',
+      summary: 'Retour sur une sortie culturelle tres appreciee en centre-ville.',
+      description:
+        "Une trentaine de membres ont participe a la visite culturelle organisee a Rodez.\n\nLe groupe a alterne patrimoine local, visite guidee et dejeuner convivial.\n\nCette sortie servira de base pour les prochains rendez-vous culturels de la saison.",
+      location: 'Centre historique de Rodez',
+      coverImageUrl: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80',
+      startAt: new Date('2026-09-18T09:00:00.000Z'),
+      endAt: new Date('2026-09-18T16:30:00.000Z'),
+      status: EventStatus.COMPLETED,
+    },
+  ] as const
+
+  for (const event of events) {
+    await prisma.event.upsert({
+      where: { slug: event.slug },
+      update: event,
+      create: event,
+    })
+  }
+
+  const eventMap = new Map(
+    (
+      await prisma.event.findMany({
+        select: {
+          id: true,
+          slug: true,
+        },
+      })
+    ).map((event) => [event.slug, event.id]),
+  )
+
+  const albums = [
+    {
+      slug: 'soiree-annuelle-2026',
+      title: 'Soiree annuelle 2026',
+      summary: 'Les meilleurs moments de la soiree annuelle en images.',
+      coverImageUrl: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&q=80',
+      eventSlug: 'pot-accueil-nouveaux-membres',
+      photos: [
+        {
+          url: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80',
+          alt: 'Discours de bienvenue',
+          caption: "Le mot d'accueil du bureau.",
+        },
+        {
+          url: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
+          alt: 'Tables pendant la soiree',
+          caption: 'Un beau moment de convivialite partagee.',
+        },
+      ],
+    },
+    {
+      slug: 'visite-culturelle-rodez-2026',
+      title: 'Visite culturelle a Rodez',
+      summary: 'Album photo de la derniere sortie culturelle en centre-ville.',
+      coverImageUrl: 'https://images.unsplash.com/photo-1503428593586-e225b39bddfe?auto=format&fit=crop&w=1200&q=80',
+      eventSlug: 'visite-culturelle-rodez',
+      photos: [
+        {
+          url: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80',
+          alt: 'Ruelle de centre-ville',
+          caption: 'Le groupe pendant la promenade guidee.',
+        },
+        {
+          url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80',
+          alt: 'Photo de groupe',
+          caption: 'Photo souvenir avant le dejeuner.',
+        },
+      ],
+    },
+  ] as const
+
+  for (const album of albums) {
+    const existingAlbum = await prisma.photoAlbum.findUnique({
+      where: { slug: album.slug },
+      select: { id: true },
+    })
+
+    if (existingAlbum) {
+      await prisma.photoItem.deleteMany({
+        where: {
+          albumId: existingAlbum.id,
+        },
+      })
+
+      await prisma.photoAlbum.update({
+        where: { id: existingAlbum.id },
+        data: {
+          title: album.title,
+          summary: album.summary,
+          coverImageUrl: album.coverImageUrl,
+          eventId: eventMap.get(album.eventSlug) ?? null,
+          photos: {
+            create: album.photos.map((photo, index) => ({
+              ...photo,
+              sortOrder: index,
+            })),
+          },
+        },
+      })
+    } else {
+      await prisma.photoAlbum.create({
+        data: {
+          slug: album.slug,
+          title: album.title,
+          summary: album.summary,
+          coverImageUrl: album.coverImageUrl,
+          eventId: eventMap.get(album.eventSlug) ?? null,
+          photos: {
+            create: album.photos.map((photo, index) => ({
+              ...photo,
+              sortOrder: index,
+            })),
+          },
+        },
+      })
+    }
+  }
+
+  const documents = [
+    {
+      slug: 'reglement-interieur-2026',
+      title: 'Reglement interieur 2026',
+      description: "Version actualisee du reglement interieur de l'amicale.",
+      fileName: 'reglement-interieur-2026.txt',
+      filePath: '/documents/reglement-interieur-2026.txt',
+      mimeType: 'text/plain',
+      sizeBytes: 1820,
+      uploadedByEmail: 'admin@amicale-ragt.local',
+    },
+    {
+      slug: 'compte-rendu-assemblee-generale',
+      title: "Compte-rendu de l'assemblee generale",
+      description: 'Synthese des decisions et points marquants de la derniere assemblee generale.',
+      fileName: 'compte-rendu-ag.txt',
+      filePath: '/documents/compte-rendu-ag.txt',
+      mimeType: 'text/plain',
+      sizeBytes: 2411,
+      uploadedByEmail: 'anne@amicale-ragt.local',
+    },
+  ] as const
+
+  for (const document of documents) {
+    await prisma.document.upsert({
+      where: { slug: document.slug },
+      update: {
+        title: document.title,
+        description: document.description,
+        fileName: document.fileName,
+        filePath: document.filePath,
+        mimeType: document.mimeType,
+        sizeBytes: document.sizeBytes,
+        uploadedById: userByEmail.get(document.uploadedByEmail)!,
+      },
+      create: {
+        title: document.title,
+        slug: document.slug,
+        description: document.description,
+        fileName: document.fileName,
+        filePath: document.filePath,
+        mimeType: document.mimeType,
+        sizeBytes: document.sizeBytes,
+        uploadedById: userByEmail.get(document.uploadedByEmail)!,
+      },
+    })
+  }
+
   console.log('Seed auth termine.')
   console.log('Admin  -> admin@amicale-ragt.local / Admin2030!')
   console.log('Membre -> membre@amicale-ragt.local / Membre2030!')
   console.log('Seed actualites termine.')
+  console.log('Seed intranet termine.')
 }
 
 main()

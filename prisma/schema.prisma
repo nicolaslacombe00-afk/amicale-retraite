@@ -21,17 +21,30 @@ enum NewsStatus {
   PUBLISHED
 }
 
+enum EventStatus {
+  UPCOMING
+  COMPLETED
+}
+
 model User {
-  id              String        @id @default(cuid())
-  email           String        @unique
-  name            String
-  passwordHash    String
-  role            UserRole      @default(USER)
-  isActive        Boolean       @default(true)
-  sessions        Session[]
+  id                String         @id @default(cuid())
+  email             String         @unique
+  name              String
+  passwordHash      String
+  role              UserRole       @default(USER)
+  isActive          Boolean        @default(true)
+  avatarUrl         String?
+  city              String?
+  phone             String?
+  formerJobTitle    String?
+  formerDepartment  String?
+  bio               String?
+  joinedAmicaleAt   DateTime?
+  sessions          Session[]
   authoredArticles NewsArticle[] @relation("ArticleAuthor")
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  uploadedDocuments Document[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }
 
 model Session {
@@ -92,4 +105,66 @@ model NewsImage {
   article   NewsArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@index([articleId, sortOrder])
+}
+
+model Event {
+  id            String       @id @default(cuid())
+  title         String
+  slug          String       @unique
+  summary       String
+  description   String
+  location      String
+  coverImageUrl String?
+  startAt       DateTime
+  endAt         DateTime?
+  status        EventStatus  @default(UPCOMING)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  albums        PhotoAlbum[]
+
+  @@index([status, startAt])
+}
+
+model PhotoAlbum {
+  id            String       @id @default(cuid())
+  title         String
+  slug          String       @unique
+  summary       String
+  coverImageUrl String?
+  eventId       String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  event         Event?       @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  photos        PhotoItem[]
+
+  @@index([eventId])
+}
+
+model PhotoItem {
+  id        String     @id @default(cuid())
+  albumId   String
+  url       String
+  alt       String?
+  caption   String?
+  sortOrder Int        @default(0)
+  createdAt DateTime   @default(now())
+  album     PhotoAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@index([albumId, sortOrder])
+}
+
+model Document {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  description   String?
+  fileName      String
+  filePath      String
+  mimeType      String?
+  sizeBytes     Int?
+  uploadedById  String
+  createdAt     DateTime @default(now())
+  uploadedBy    User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@index([uploadedById, createdAt])
 }
