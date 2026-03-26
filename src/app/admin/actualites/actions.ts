@@ -72,6 +72,11 @@ function articlePaths(slug?: string) {
   return ['/actualites', '/admin/actualites', ...(slug ? [`/actualites/${slug}`] : [])]
 }
 
+function withQuery(pathname: string, key: string, value: string) {
+  const separator = pathname.includes('?') ? '&' : '?'
+  return `${pathname}${separator}${key}=${value}`
+}
+
 export async function createNewsArticleAction(formData: FormData) {
   const admin = await requireAdminUser()
 
@@ -83,9 +88,10 @@ export async function createNewsArticleAction(formData: FormData) {
   const featured = formData.get('featured') === 'on'
   const status = parseStatus(formData.get('status'))
   const images = parseImages(String(formData.get('images') || ''))
+  const returnTo = String(formData.get('returnTo') || '').trim()
 
   if (!title || !excerpt || !content || !categoryId) {
-    redirect('/admin/actualites?error=missing')
+    redirect(withQuery(returnTo || '/admin/actualites', 'error', 'missing'))
   }
 
   const slug = await buildUniqueSlug(title, String(formData.get('slug') || ''))
@@ -110,6 +116,12 @@ export async function createNewsArticleAction(formData: FormData) {
 
   for (const path of articlePaths(article.slug)) {
     revalidatePath(path)
+  }
+
+  revalidatePath('/admin')
+
+  if (returnTo) {
+    redirect(withQuery(returnTo, 'success', 'article-created'))
   }
 
   redirect(`/admin/actualites/${article.id}?success=created`)
@@ -180,6 +192,8 @@ export async function updateNewsArticleAction(articleId: string, formData: FormD
 export async function deleteNewsArticleAction(articleId: string) {
   await requireAdminUser()
 
+  const returnTo = '/admin?section=actualites'
+
   const current = await prisma.newsArticle.findUnique({
     where: { id: articleId },
     select: {
@@ -199,5 +213,6 @@ export async function deleteNewsArticleAction(articleId: string) {
     revalidatePath(path)
   }
 
-  redirect('/admin/actualites?success=deleted')
+  revalidatePath('/admin')
+  redirect(withQuery(returnTo, 'success', 'article-deleted'))
 }

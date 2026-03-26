@@ -50,10 +50,10 @@ export default async function AdminActualiteDetailPage({
               Voir l&apos;article
             </Link>
             <Link
-              href="/admin/actualites"
+              href="/admin?section=actualites"
               className="rounded-full bg-[#121b2c] px-4 py-2 text-sm font-bold text-white transition hover:bg-black"
             >
-              Retour liste
+              Retour au back-office
             </Link>
           </div>
         </div>
