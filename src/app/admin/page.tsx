@@ -89,6 +89,11 @@ export default async function AdminDashboardPage() {
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <ModuleCard
+              href="/admin/navigation"
+              title="Navigation"
+              detail="Piloter le menu lateral, l ordre des liens et les sous-elements."
+            />
+            <ModuleCard
               href="/admin/actualites"
               title="Actualites"
               detail="Creer, publier, mettre a la une et modifier les articles."

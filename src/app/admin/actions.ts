@@ -1,6 +1,6 @@
 'use server'
 
-import { EventStatus, UserRole } from '@prisma/client'
+import { EventStatus, NavigationSection, UserRole } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { unlink } from 'node:fs/promises'
@@ -40,6 +40,10 @@ function parseDate(value: FormDataEntryValue | null) {
 
   const parsed = new Date(input)
   return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function parseNavigationSection(value: FormDataEntryValue | null) {
+  return value === NavigationSection.SECONDARY ? NavigationSection.SECONDARY : NavigationSection.PRIMARY
 }
 
 function parsePhotos(value: string) {
@@ -287,4 +291,80 @@ export async function deleteDocumentAction(documentId: string, returnTo = '/admi
 
   revalidateBackOffice(['/admin', '/documents'])
   redirect(withQuery(returnTo, 'success', 'document-deleted'))
+}
+
+export async function createNavigationItemAction(formData: FormData) {
+  await requireAdminUser()
+
+  const label = String(formData.get('label') || '').trim()
+  const href = String(formData.get('href') || '').trim() || null
+  const icon = String(formData.get('icon') || '').trim() || 'home'
+  const sortOrder = Number(String(formData.get('sortOrder') || '0')) || 0
+  const parentId = String(formData.get('parentId') || '').trim() || null
+  const returnTo = String(formData.get('returnTo') || '/admin/navigation').trim()
+  const section = parseNavigationSection(formData.get('section'))
+  const isVisible = formData.get('isVisible') === 'on'
+
+  if (!label) {
+    redirect(withQuery(returnTo, 'error', 'missing'))
+  }
+
+  await prisma.navigationItem.create({
+    data: {
+      label,
+      href,
+      icon,
+      sortOrder,
+      section,
+      parentId,
+      isVisible,
+    },
+  })
+
+  revalidateBackOffice(['/admin', returnTo])
+  redirect(withQuery(returnTo, 'success', 'nav-created'))
+}
+
+export async function updateNavigationItemAction(itemId: string, formData: FormData) {
+  await requireAdminUser()
+
+  const label = String(formData.get('label') || '').trim()
+  const href = String(formData.get('href') || '').trim() || null
+  const icon = String(formData.get('icon') || '').trim() || 'home'
+  const sortOrder = Number(String(formData.get('sortOrder') || '0')) || 0
+  const parentId = String(formData.get('parentId') || '').trim() || null
+  const returnTo = String(formData.get('returnTo') || '/admin/navigation').trim()
+  const section = parseNavigationSection(formData.get('section'))
+  const isVisible = formData.get('isVisible') === 'on'
+
+  if (!label) {
+    redirect(withQuery(returnTo, 'error', 'missing'))
+  }
+
+  await prisma.navigationItem.update({
+    where: { id: itemId },
+    data: {
+      label,
+      href,
+      icon,
+      sortOrder,
+      section,
+      parentId,
+      isVisible,
+    },
+  })
+
+  revalidateBackOffice(['/admin', returnTo])
+  redirect(withQuery(returnTo, 'success', 'nav-updated'))
+}
+
+export async function deleteNavigationItemAction(itemId: string, returnTo = '/admin/navigation') {
+  await requireAdminUser()
+
+  await prisma.navigationItem.delete({
+    where: { id: itemId },
+  })
+
+  revalidateBackOffice(['/admin', returnTo])
+  redirect(withQuery(returnTo, 'success', 'nav-deleted'))
 }

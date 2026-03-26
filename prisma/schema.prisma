@@ -26,6 +26,11 @@ enum EventStatus {
   COMPLETED
 }
 
+enum NavigationSection {
+  PRIMARY
+  SECONDARY
+}
+
 model User {
   id                String         @id @default(cuid())
   email             String         @unique
@@ -167,4 +172,22 @@ model Document {
   uploadedBy    User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
 
   @@index([uploadedById, createdAt])
+}
+
+model NavigationItem {
+  id        String            @id @default(cuid())
+  label     String
+  href      String?
+  icon      String
+  section   NavigationSection
+  parentId  String?
+  sortOrder Int               @default(0)
+  isVisible Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  parent    NavigationItem?   @relation("NavigationChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children  NavigationItem[]  @relation("NavigationChildren")
+
+  @@index([section, sortOrder])
+  @@index([parentId, sortOrder])
 }

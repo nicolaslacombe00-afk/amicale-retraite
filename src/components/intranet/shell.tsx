@@ -2,8 +2,6 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { logoutAction } from '@/src/app/login/actions'
 import {
-  primaryNav,
-  secondaryNav,
   type EventCard,
   type IconName,
   type MemberSpotlight,
@@ -12,6 +10,7 @@ import {
   type QuickLink,
 } from '@/src/components/intranet/data'
 import { requireAuthenticatedUser } from '@/src/lib/auth/session'
+import { listNavigationTree } from '@/src/lib/navigation'
 
 export async function AppShell({
   children,
@@ -25,6 +24,10 @@ export async function AppShell({
   eyebrow?: string
 }) {
   const user = await requireAuthenticatedUser()
+  const navigation = await listNavigationTree()
+  const homeItem = navigation.primary[0] ?? null
+  const mainItems = homeItem ? navigation.primary.slice(1) : navigation.primary
+  const homeActive = activePath === '/'
 
   return (
     <main className="min-h-screen bg-[#fafafa] lg:flex">
@@ -38,38 +41,19 @@ export async function AppShell({
 
         <nav className="flex flex-1 flex-col justify-between px-4 pb-5 xl:px-5 xl:pb-6">
           <div>
-            <details open className="mb-2">
-              <summary className="flex cursor-pointer items-center rounded-[18px] bg-[#0f9d6b] px-4 py-3.5 shadow-[0_14px_30px_rgba(0,0,0,0.16)] transition hover:bg-[#12a975] xl:px-5 xl:py-4">
-              <AppIcon name="home" className="h-5 w-5 shrink-0 xl:h-6 xl:w-6" />
-              <span className="ml-4 flex-1 text-left text-[17px] font-semibold xl:text-[18px]">Accueil</span>
-              <AppIcon name="chevron-down" className="h-4 w-4 shrink-0 transition group-open:rotate-180" />
-            </summary>
-            <div className="mt-0.5 overflow-hidden rounded-b-[18px] bg-white/5 px-4 py-2.5">
-              <Link href="/" className="flex w-full items-center rounded-xl px-4 py-2.5 text-left text-[15px] font-bold text-white xl:text-[16px]">
-                <span className="mr-3 h-2 w-2 rounded-full bg-[#988b7b]" />
-                Tableau de bord
-              </Link>
-              <Link
-                href="/actualites"
-                className="flex w-full items-center rounded-xl px-4 py-2.5 text-left text-[15px] text-stone-300 transition hover:text-white xl:text-[16px]"
-              >
-                <span className="mr-3 h-2 w-2 rounded-full bg-[#ff5252]" />
-                Messages Importants
-              </Link>
-            </div>
-            </details>
+            {homeItem ? <NavGroup item={homeItem} activePath={activePath} defaultOpen={homeActive} /> : null}
 
             <div className="space-y-0.5">
-              {primaryNav.map((item) => (
-                <NavButton key={item.label} item={item} active={item.href === activePath} />
+              {mainItems.map((item) => (
+                <NavButton key={item.id || item.label} item={item} active={isNavItemActive(item, activePath)} />
               ))}
             </div>
 
             <div className="mx-3 my-4 border-t border-white/10" />
 
             <div className="space-y-0.5">
-              {secondaryNav.map((item) => (
-                <NavButton key={item.label} item={item} />
+              {navigation.secondary.map((item) => (
+                <NavButton key={item.id || item.label} item={item} active={isNavItemActive(item, activePath)} />
               ))}
             </div>
 
@@ -183,7 +167,7 @@ function NavButton({ item, active = false }: { item: NavItem; active?: boolean }
   )
 
   const className = `flex w-full items-center rounded-[18px] px-4 py-3 text-left transition xl:px-5 xl:py-3.5 ${
-    active ? 'bg-white/8 text-white' : 'text-[#f0f1f3] hover:bg-white/5 hover:text-white'
+    active ? 'bg-[#0f9d6b] text-white shadow-[0_14px_30px_rgba(0,0,0,0.16)]' : 'text-[#f0f1f3] hover:bg-white/5 hover:text-white'
   }`
 
   return item.href ? (
@@ -193,6 +177,81 @@ function NavButton({ item, active = false }: { item: NavItem; active?: boolean }
   ) : (
     <button className={className}>{content}</button>
   )
+}
+
+function NavGroup({
+  item,
+  activePath,
+  defaultOpen = false,
+}: {
+  item: NavItem
+  activePath: string
+  defaultOpen?: boolean
+}) {
+  const active = item.href ? isLinkActive(item.href, activePath) : false
+
+  return (
+    <details open={defaultOpen || active} className="mb-2">
+      <summary
+        className={`flex cursor-pointer items-center rounded-[18px] px-4 py-3.5 transition xl:px-5 xl:py-4 ${
+          active
+            ? 'bg-[#0f9d6b] text-white shadow-[0_14px_30px_rgba(0,0,0,0.16)]'
+            : 'text-[#f0f1f3] hover:bg-white/5 hover:text-white'
+        }`}
+      >
+        <AppIcon name={item.icon} className="h-5 w-5 shrink-0 xl:h-6 xl:w-6" />
+        <span className="ml-4 flex-1 text-left text-[17px] font-semibold xl:text-[18px]">{item.label}</span>
+        <AppIcon name="chevron-down" className="h-4 w-4 shrink-0 transition group-open:rotate-180" />
+      </summary>
+
+      <div className="mt-0.5 overflow-hidden rounded-b-[18px] bg-white/5 px-4 py-2.5">
+        {item.children?.map((child) => {
+          const childActive = isNavItemActive(child, activePath)
+
+          return child.href ? (
+            <Link
+              key={child.id || child.label}
+              href={child.href}
+              className={`flex w-full items-center rounded-xl px-4 py-2.5 text-left text-[15px] transition xl:text-[16px] ${
+                childActive ? 'font-extrabold text-white' : 'text-stone-300 hover:text-white'
+              }`}
+            >
+              <span className={`mr-3 h-2 w-2 rounded-full ${childActive ? 'bg-white' : 'bg-white/40'}`} />
+              {child.label}
+            </Link>
+          ) : (
+            <div
+              key={child.id || child.label}
+              className={`flex w-full items-center rounded-xl px-4 py-2.5 text-left text-[15px] xl:text-[16px] ${
+                childActive ? 'font-extrabold text-white' : 'text-stone-300'
+              }`}
+            >
+              <span className={`mr-3 h-2 w-2 rounded-full ${childActive ? 'bg-white' : 'bg-white/40'}`} />
+              {child.label}
+            </div>
+          )
+        })}
+      </div>
+    </details>
+  )
+}
+
+function isNavItemActive(item: NavItem, activePath: string): boolean {
+  if (item.href) {
+    if (isLinkActive(item.href, activePath)) {
+      return true
+    }
+  }
+
+  return item.children?.some((child) => isNavItemActive(child, activePath)) ?? false
+}
+
+function isLinkActive(href: string, activePath: string): boolean {
+  if (href === '/') {
+    return activePath === '/'
+  }
+
+  return activePath === href || activePath.startsWith(`${href}/`)
 }
 
 export function QuickLinkCard({ link }: { link: QuickLink }) {

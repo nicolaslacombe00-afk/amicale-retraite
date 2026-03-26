@@ -12,6 +12,7 @@ type AdminNavItem = {
 
 const contentNav: AdminNavItem[] = [
   { label: 'Tableau de bord', href: '/admin', icon: 'home' },
+  { label: 'Navigation', href: '/admin/navigation', icon: 'ticket' },
   { label: 'Actualites', href: '/admin/actualites', icon: 'newspaper' },
   { label: 'Agenda', href: '/admin/evenements', icon: 'calendar' },
   { label: 'Annuaire & membres', href: '/admin/membres', icon: 'users' },

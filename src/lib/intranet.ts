@@ -19,11 +19,14 @@ export type EventCardData = {
 export type MemberDirectoryCard = {
   id: string
   name: string
+  email: string
   city: string | null
   formerJobTitle: string | null
   formerDepartment: string | null
   avatarUrl: string | null
   joinedAmicaleAt: Date | null
+  role: 'ADMIN' | 'USER'
+  isActive: boolean
 }
 
 export type MemberProfile = {
@@ -164,11 +167,14 @@ export async function listDirectoryMembers() {
     select: {
       id: true,
       name: true,
+      email: true,
       city: true,
       formerJobTitle: true,
       formerDepartment: true,
       avatarUrl: true,
       joinedAmicaleAt: true,
+      role: true,
+      isActive: true,
     },
   }) satisfies Promise<MemberDirectoryCard[]>
 }

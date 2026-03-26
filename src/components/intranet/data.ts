@@ -20,10 +20,12 @@ export type IconName =
   | 'users'
 
 export type NavItem = {
+  id?: string
   label: string
   icon: IconName
-  href?: string
+  href?: string | null
   trailing?: boolean
+  children?: NavItem[]
 }
 
 export type EventCard = {

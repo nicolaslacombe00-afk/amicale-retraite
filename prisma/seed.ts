@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, NewsStatus, EventStatus } from '@prisma/client'
+import { PrismaClient, UserRole, NewsStatus, EventStatus, NavigationSection } from '@prisma/client'
 import { hashPassword } from '../src/lib/auth/password'
 
 const prisma = new PrismaClient()
@@ -450,6 +450,182 @@ async function main() {
         uploadedById: userByEmail.get(document.uploadedByEmail)!,
       },
     })
+  }
+
+  const navigationItems = [
+    {
+      key: 'home',
+      label: 'Accueil',
+      href: null,
+      icon: 'home',
+      section: NavigationSection.PRIMARY,
+      sortOrder: 0,
+      parentKey: null,
+    },
+    {
+      key: 'home-dashboard',
+      label: 'Tableau de bord',
+      href: '/',
+      icon: 'home',
+      section: NavigationSection.PRIMARY,
+      sortOrder: 0,
+      parentKey: 'home',
+    },
+    {
+      key: 'home-important-news',
+      label: 'Messages Importants',
+      href: '/actualites',
+      icon: 'newspaper',
+      section: NavigationSection.PRIMARY,
+      sortOrder: 1,
+      parentKey: 'home',
+    },
+    {
+      key: 'news',
+      label: 'Actualites',
+      href: '/actualites',
+      icon: 'newspaper',
+      section: NavigationSection.PRIMARY,
+      sortOrder: 1,
+      parentKey: null,
+    },
+    {
+      key: 'events',
+      label: 'Evenements',
+      href: '/evenements',
+      icon: 'calendar',
+      section: NavigationSection.PRIMARY,
+      sortOrder: 2,
+      parentKey: null,
+    },
+    {
+      key: 'members',
+      label: 'Membres',
+      href: '/membres',
+      icon: 'users',
+      section: NavigationSection.PRIMARY,
+      sortOrder: 3,
+      parentKey: null,
+    },
+    {
+      key: 'gallery',
+      label: 'Galerie photo',
+      href: '/galerie-photo',
+      icon: 'camera',
+      section: NavigationSection.PRIMARY,
+      sortOrder: 4,
+      parentKey: null,
+    },
+    {
+      key: 'documents',
+      label: 'Documents',
+      href: '/documents',
+      icon: 'file-text',
+      section: NavigationSection.PRIMARY,
+      sortOrder: 5,
+      parentKey: null,
+    },
+    {
+      key: 'amicale',
+      label: "L'Amicale",
+      href: null,
+      icon: 'heart',
+      section: NavigationSection.SECONDARY,
+      sortOrder: 0,
+      parentKey: null,
+    },
+    {
+      key: 'profile',
+      label: 'Mon profil',
+      href: null,
+      icon: 'user',
+      section: NavigationSection.SECONDARY,
+      sortOrder: 1,
+      parentKey: null,
+    },
+    {
+      key: 'help',
+      label: 'Aide',
+      href: null,
+      icon: 'help-circle',
+      section: NavigationSection.SECONDARY,
+      sortOrder: 2,
+      parentKey: null,
+    },
+  ] as const
+
+  const navIds = new Map<string, string>()
+
+  for (const item of navigationItems.filter((entry) => !entry.parentKey)) {
+    const existing = await prisma.navigationItem.findFirst({
+      where: {
+        label: item.label,
+        parentId: null,
+        section: item.section,
+      },
+    })
+
+    const saved = existing
+      ? await prisma.navigationItem.update({
+          where: { id: existing.id },
+          data: {
+            href: item.href,
+            icon: item.icon,
+            sortOrder: item.sortOrder,
+            isVisible: true,
+          },
+        })
+      : await prisma.navigationItem.create({
+          data: {
+            label: item.label,
+            href: item.href,
+            icon: item.icon,
+            section: item.section,
+            sortOrder: item.sortOrder,
+            isVisible: true,
+          },
+        })
+
+    navIds.set(item.key, saved.id)
+  }
+
+  for (const item of navigationItems.filter((entry) => entry.parentKey)) {
+    const parentId = navIds.get(item.parentKey!)
+
+    if (!parentId) {
+      continue
+    }
+
+    const existing = await prisma.navigationItem.findFirst({
+      where: {
+        label: item.label,
+        parentId,
+      },
+    })
+
+    if (existing) {
+      await prisma.navigationItem.update({
+        where: { id: existing.id },
+        data: {
+          href: item.href,
+          icon: item.icon,
+          sortOrder: item.sortOrder,
+          isVisible: true,
+        },
+      })
+    } else {
+      await prisma.navigationItem.create({
+        data: {
+          label: item.label,
+          href: item.href,
+          icon: item.icon,
+          section: item.section,
+          sortOrder: item.sortOrder,
+          isVisible: true,
+          parentId,
+        },
+      })
+    }
   }
 
   console.log('Seed auth termine.')
